@@ -104,7 +104,7 @@ lblCleanup:
 		cout << "-s [optional] Search for DLL references in the binary files of current running processes and services." << endl;
 		cout << "-r n [optional] Recursion search for DLL references in found DLL files privous scan." << endl << "   n is the number is the level of the recursion" << endl;
 		cout << "-o [optional] Output path for the results in csv format of" << endl;
-		cout << "               By ommiting this option, a defulat result file would be created on the desktop of the current user." << endl;
+		cout << "               By ommiting this option, a default result file will be created on the desktop of the current user." << endl;
 		cout << "               Named after the name of the computer .csv" << endl;
 		
 	}
@@ -155,13 +155,13 @@ ESTATUS FindDllHjacking(string OutputPath, bool bStatic, bool bRecrusive, DWORD 
 	
 	if (bStatic)
 	{
-		cout << "Start analyzing processes executables, static analysis" << endl;
+		cout << "Start analyzing process executables, static analysis" << endl;
 		fLogFile << "Static Extraction" << endl;
 		fLogFile << "Severity," << "Exist," << "Binary," << "DLL" << endl; 
 
 		eReturn = EnumerateProcessesBinaries(&p);
 		fLogFile << endl;
-		cout << "Done looking for static executables hijacking" << endl;
+		cout << "Done looking for static executable hijacking" << endl;
 		cout << "=================================================================================" << endl;
 	}
 
@@ -195,7 +195,7 @@ ESTATUS EnumerateRunningProcesses(PProcessContainer p)
 	string sUserName;
 	string sDomainName;
 
-	//Impersonate explorer.exe token in order to preform access check with week privileges
+	//Impersonate explorer.exe token in order to preform access check with weak privileges
 	eReturn = GetImpersonatedToken(&hImpersonatedToken, processName);
 	if (hImpersonatedToken == NULL || ESTATUS_FAILED(eReturn))
 	{
@@ -246,7 +246,7 @@ ESTATUS EnumerateRunningProcesses(PProcessContainer p)
 			}
 			if (!isSecureDir)
 			{
-				// Check if current logged on user is able has write permission to directory, if so we can hijack a dll there
+				// Check if current logged on user has write permission to the directory, so we can hijack a dll there
 				BOOL bDirAccessAllowd = FALSE;
 				BOOL bFileAllwod = FALSE;
 
@@ -344,7 +344,7 @@ ESTATUS GetServicesDLLS(PProcessContainer p)
 			while (getline(tokenStream, token, '\n'))
 			{
 
-				//Double filtring, make sure we don't have any wierd chracters
+				//Double filtering to make sure we don't have any weird characters
 				GetDllFromToken(token);
 				GetDllFromToken(token);
 
@@ -393,7 +393,7 @@ ESTATUS GetHijackedDirectories(PProcessContainer p)
 			BOOL bDirAccessAllowd = FALSE;
 			BOOL bFileAllwod = FALSE;
 			
-			// If the DLL is in full path foramt, there is no chance for hijacking even if the DLL exist
+			// If the DLL is in full path format, there is no chance for hijacking even if the DLL exists
 			if (PathFileExistsA(sDllName.c_str()))
 				break;
 
@@ -484,7 +484,7 @@ void RecursiveChecking(PProcessContainer p)
 			string sOptionalDllPath = sProcessDir + sDllName;
 			string sDefinetDLLPath = "";
 
-			// Incase dll name contains expanded enviroment variables
+			// Incase DLL name contains expanded environment variables
 			if (PathFileExistsA(sDllName.c_str()))
 				sDefinetDLLPath = sDllName;
 			
@@ -529,7 +529,7 @@ void print(PProcessContainer p, string sOutputPath)
 
 	Beautify(p, "Critical endangered applications", "High");
 	Beautify(p, "Medium endangered applications", "Medium");
-	Beautify(p, "Least endangered applications", "Low");
+	Beautify(p, "Low endangered applications", "Low");
 
 	fNewLog.close();
 
@@ -545,7 +545,7 @@ string GetFilename(string sFullPath)
 	return sFullPath;
 }
 
-void Beautify(PProcessContainer p, string message, string sevirity)
+void Beautify(PProcessContainer p, string message, string severity)
 {
 	fNewLog << message << endl << endl;
 	for (auto &it : p->vProcessData)
@@ -553,13 +553,13 @@ void Beautify(PProcessContainer p, string message, string sevirity)
 		int count = 0;
 		for (auto j : it.vsDLLs)
 		{
-			if (!j.sServirity.compare(sevirity))
+			if (!j.sServirity.compare(severity))
 			{
 				count++;
 				if (count == 1)
 				{
 					string sFileName = GetFilename(it.sBinaryPath);
-					fNewLog << "Application:  " << sFileName << "," << "Path:  " << it.sBinaryPath.c_str() << "," << "User:  " << it.sUserName << "," << "Sevirtiy:  " << sevirity << endl;
+					fNewLog << "Application:  " << sFileName << "," << "Path:  " << it.sBinaryPath.c_str() << "," << "User:  " << it.sUserName << "," << "Severity:  " << severity << endl;
 					fNewLog << "Modules" << endl;
 				}
 				fNewLog << j.sBinaryPath.c_str() << endl;
